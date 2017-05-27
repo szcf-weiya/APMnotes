@@ -97,3 +97,26 @@ svmRFE <- rfe(x = training[, predVars],
 ## filter methods
 ## ######################################################
 
+## to compute a p-value for each predictor
+pScore <- function(x, y)
+{
+  numX = length(unique(x))
+  if (numX > 2)
+  {
+    ## with many values in x, compute a t-test
+    out = t.test(x ~ y)$p.value
+  }
+  else
+  {
+    ## for binary predictors, test the odds ratio == 1 via
+    ## fisher's exact test
+    out = fisher.test(factor(x), y)$p.value
+  }
+  out
+}
+## apply the scores to each of the predictors columns
+scores <- apply(X = training[, predVars],
+                MARGIN = 2,
+                FUN = pScore,
+                y = training$Class)
+tail(scores)
